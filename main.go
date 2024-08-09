@@ -2,35 +2,49 @@ package main
 
 import "fmt"
 
-type GameState struct {
+type MarioGame struct {
 	coins     int
 	life      int
 	blood     int
 	character string
 }
 
-func (g GameState) GetCharacterAndBlood() (string, int) {
+func (g MarioGame) GetCharacterAndBlood() (string, int) {
 	return g.character, g.blood
 }
 
+type KirbyGame struct {
+	character string
+	blood     int
+	power     string
+}
+
+func (k KirbyGame) GetCharacterAndBlood() (string, int) {
+	return k.character, k.blood
+}
+
+type GameGetter interface {
+	GetCharacterAndBlood() (string, int)
+}
+
 func main() {
-	state1 := GameState{
+	var marioState GameGetter = MarioGame{
 		blood:     13,
 		character: "Mario",
 		coins:     122,
 		life:      2,
 	}
 
-	c, b := state1.GetCharacterAndBlood()
+	c, b := marioState.GetCharacterAndBlood()
+	fmt.Println(("===== MARIO"))
 	fmt.Printf("character: %s blood: %d \n", c, b)
 
-	state2 := GameState{
-		blood:     63,
-		character: "Princess",
-		coins:     122,
-		life:      4,
+	var kirbuyState GameGetter = KirbyGame{
+		character: "kirby",
+		blood:     123,
 	}
 
-	c2, b2 := state2.GetCharacterAndBlood()
-	fmt.Printf("character: %s blood: %d", c2, b2)
+	ch, bl := kirbuyState.GetCharacterAndBlood()
+	fmt.Println(("===== KIRBY"))
+	fmt.Printf("character: %s blood: %d \n", ch, bl)
 }
