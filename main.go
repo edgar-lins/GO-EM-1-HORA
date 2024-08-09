@@ -1,50 +1,54 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
-type MarioGame struct {
-	coins     int
-	life      int
-	blood     int
-	character string
-}
+func countRows(filename string) (int, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
 
-func (g MarioGame) GetCharacterAndBlood() (string, int) {
-	return g.character, g.blood
-}
+	// Cria um scanner para ler o arquivo linha por linha
+	scanner := bufio.NewScanner(file)
 
-type KirbyGame struct {
-	character string
-	blood     int
-	power     string
-}
+	//Contador de linhas
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
 
-func (k KirbyGame) GetCharacterAndBlood() (string, int) {
-	return k.character, k.blood
-}
-
-type GameGetter interface {
-	GetCharacterAndBlood() (string, int)
+	return count, nil
 }
 
 func main() {
-	var marioState GameGetter = MarioGame{
-		blood:     13,
-		character: "Mario",
-		coins:     122,
-		life:      2,
+	files := []string{"file1.txt", "file2.txt", "file3.txt"}
+	rowChannel := make(chan int, len(files))
+
+	for _, file := range files {
+		fileToRead := file
+
+		go func() {
+			fmt.Println("Reading go routine")
+			numRows, err := countRows(fileToRead)
+			if err != nil {
+				panic("ops")
+			}
+
+			rowChannel <- numRows
+		}()
 	}
 
-	c, b := marioState.GetCharacterAndBlood()
-	fmt.Println(("===== MARIO"))
-	fmt.Printf("character: %s blood: %d \n", c, b)
+	var totalRows int
 
-	var kirbuyState GameGetter = KirbyGame{
-		character: "kirby",
-		blood:     123,
+	for range files {
+		rows := <-rowChannel
+		totalRows += rows
 	}
 
-	ch, bl := kirbuyState.GetCharacterAndBlood()
-	fmt.Println(("===== KIRBY"))
-	fmt.Printf("character: %s blood: %d \n", ch, bl)
+	fmt.Println(totalRows)
 }
